@@ -1,0 +1,371 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum ReportStatus {
+  DRAFT
+  REVIEW
+  RETURNED
+  APPROVED
+  EXPORTED
+}
+
+enum SyncStatus {
+  PENDING
+  SYNCED
+  FAILED
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String
+  googleSubject String?       @unique
+  status        AccountStatus @default(ACTIVE)
+  lastAccessAt  DateTime?
+  departmentId  String?
+  department    Department?   @relation(fields: [departmentId], references: [id])
+  profile       Profile?
+  roles         UserRole[]
+  activities    Activity[]    @relation("ActivityOwner")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  createdBy     String?
+  updatedBy     String?
+  version       Int           @default(1)
+
+  @@index([departmentId])
+  @@index([status])
+}
+
+model Profile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  identityType   String?
+  identityNumber String?
+  phone          String?
+  address        String?
+  eps            String?
+  position       String?
+  photoUrl       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  version        Int      @default(1)
+}
+
+model Department {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  code         String        @unique
+  users        User[]
+  activities   Activity[]
+  driveFolders DriveFolder[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  version      Int           @default(1)
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  permissions Permission[]
+  users       UserRole[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Permission {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  roles     Role[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserRole {
+  userId    String
+  roleId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model Activity {
+  id           String                @id @default(cuid())
+  code         String                @unique
+  name         String
+  description  String?
+  objective    String?
+  type         String
+  departmentId String
+  department   Department            @relation(fields: [departmentId], references: [id])
+  ownerId      String
+  owner        User                  @relation("ActivityOwner", fields: [ownerId], references: [id])
+  startDate    DateTime
+  endDate      DateTime
+  time         String?
+  place        String?
+  modality     String?
+  program      String?
+  results      String?
+  observations String?
+  status       String                @default("DRAFT")
+  participants ActivityParticipant[]
+  evidence     ActivityEvidence[]
+  reports      Report[]
+  sniesRecords SniesRecord[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  createdBy    String?
+  updatedBy    String?
+  version      Int                   @default(1)
+
+  @@index([ownerId])
+  @@index([departmentId])
+  @@index([startDate])
+}
+
+model ActivityParticipant {
+  id             String   @id @default(cuid())
+  activityId     String
+  activity       Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  name           String
+  identification String?
+  role           String?
+  createdAt      DateTime @default(now())
+}
+
+model ActivityEvidence {
+  id         String   @id @default(cuid())
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  name       String
+  fileId     String?
+  createdAt  DateTime @default(now())
+}
+
+model ReportTemplate {
+  id        String                  @id @default(cuid())
+  name      String
+  version   Int                     @default(1)
+  published Boolean                 @default(false)
+  fields    ReportFieldDefinition[]
+  reports   Report[]
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+
+  @@unique([name, version])
+}
+
+model ReportFieldDefinition {
+  id         String         @id @default(cuid())
+  templateId String
+  template   ReportTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  key        String
+  label      String
+  required   Boolean        @default(false)
+  fieldType  String
+  config     Json?
+
+  @@unique([templateId, key])
+}
+
+model Report {
+  id            String             @id @default(cuid())
+  code          String             @unique
+  activityId    String
+  activity      Activity           @relation(fields: [activityId], references: [id], onDelete: Restrict)
+  templateId    String
+  template      ReportTemplate     @relation(fields: [templateId], references: [id])
+  status        ReportStatus       @default(DRAFT)
+  values        ReportFieldValue[]
+  versions      ReportVersion[]
+  approvals     Approval[]
+  documentFiles DocumentFile[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  createdBy     String
+  updatedBy     String
+  version       Int                @default(1)
+
+  @@index([activityId])
+  @@index([status])
+}
+
+model ReportFieldValue {
+  id       String @id @default(cuid())
+  reportId String
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  key      String
+  value    Json
+
+  @@unique([reportId, key])
+}
+
+model ReportVersion {
+  id        String   @id @default(cuid())
+  reportId  String
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  version   Int
+  snapshot  Json
+  createdBy String
+  createdAt DateTime @default(now())
+
+  @@unique([reportId, version])
+}
+
+model SniesTemplate {
+  id           String              @id @default(cuid())
+  name         String
+  sourceFileId String?
+  mappings     SniesFieldMapping[]
+  versions     SniesVersion[]
+  records      SniesRecord[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  version      Int                 @default(1)
+}
+
+model SniesFieldMapping {
+  id            String        @id @default(cuid())
+  templateId    String
+  template      SniesTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  sheetName     String
+  columnName    String
+  webField      String
+  databaseField String
+  validation    Json?
+
+  @@unique([templateId, sheetName, columnName])
+}
+
+model SniesRecord {
+  id         String        @id @default(cuid())
+  activityId String
+  activity   Activity      @relation(fields: [activityId], references: [id], onDelete: Restrict)
+  templateId String
+  template   SniesTemplate @relation(fields: [templateId], references: [id])
+  values     Json
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  createdBy  String
+  updatedBy  String
+  version    Int           @default(1)
+
+  @@unique([activityId, templateId])
+  @@index([templateId])
+}
+
+model SniesVersion {
+  id         String        @id @default(cuid())
+  templateId String
+  template   SniesTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  version    Int
+  snapshot   Json
+  createdBy  String
+  createdAt  DateTime      @default(now())
+
+  @@unique([templateId, version])
+}
+
+model DriveConnection {
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  accessTokenEncrypted  String?
+  refreshTokenEncrypted String?
+  expiresAt             DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model DriveFolder {
+  id           String      @id @default(cuid())
+  driveId      String      @unique
+  name         String
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  syncStatus   SyncStatus  @default(PENDING)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model DocumentFile {
+  id          String     @id @default(cuid())
+  reportId    String?
+  report      Report?    @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  driveFileId String?
+  name        String
+  mimeType    String
+  syncStatus  SyncStatus @default(PENDING)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdBy   String
+
+  @@index([driveFileId])
+  @@index([reportId])
+}
+
+model Approval {
+  id         String   @id @default(cuid())
+  reportId   String
+  report     Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  decision   String
+  comments   String?
+  approverId String
+  createdAt  DateTime @default(now())
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  action     String
+  entityType String
+  entityId   String
+  changes    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model SyncJob {
+  id             String     @id @default(cuid())
+  entityType     String
+  entityId       String
+  status         SyncStatus @default(PENDING)
+  attempts       Int        @default(0)
+  error          String?
+  idempotencyKey String     @unique
+  nextRetryAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([status, nextRetryAt])
+}
