@@ -4,6 +4,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "SIGD - Gestión Documental",
   description: "Sistema Institucional de Gestión Documental",
+  icons: {
+    icon: "/logo/logo_color_unicesmag.png",
+    shortcut: "/logo/logo_color_unicesmag.png",
+    apple: "/logo/logo_color_unicesmag.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

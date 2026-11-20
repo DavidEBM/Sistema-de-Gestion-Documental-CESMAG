@@ -1,8 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   Bell,
@@ -33,6 +33,7 @@ const nav = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [systemDialog, setSystemDialog] = useState<"help" | "status" | null>(null);
@@ -71,7 +72,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-identity">
-            <div className="brand-mark">CES</div>
+            <Image
+              className="brand-logo"
+              src="/logo/logo_color_unicesmag.png"
+              alt="CESMAG"
+              width={44}
+              height={44}
+              priority
+            />
             <div className="brand-name">Gestión Documental Institucional</div>
           </div>
           <button
@@ -125,7 +133,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <ShieldCheck size={17} /> Revisar estado del sistema
                   </button>
                   <div className="profile-dropdown-divider" />
-                  <button className="logout-option" type="button" role="menuitem" onClick={() => signOut({ callbackUrl: "/login" })}>
+                  <button className="logout-option" type="button" role="menuitem" onClick={() => router.push("/login")}>
                     <LogOut size={17} /> Cerrar sesión
                   </button>
                 </div>
