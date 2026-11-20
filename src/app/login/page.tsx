@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import { signIn } from "next-auth/react";
 import { BriefcaseBusiness, ShieldCheck, Workflow } from "lucide-react";
 
 export default function LoginPage() {
@@ -22,10 +24,10 @@ export default function LoginPage() {
           <h1>Ingreso al sistema</h1>
           <p>Utilice su cuenta institucional autorizada para acceder al Sistema de Gestión Documental.</p>
           <div className="protected"><ShieldCheck size={14} /> Acceso protegido</div>
-          <Link className="google" href="/dashboard" aria-label="Continuar con Google">
+          <button className="google" type="button" aria-label="Continuar con Google" onClick={() => signIn("google", { callbackUrl: "/dashboard" })}>
             <span aria-hidden="true">G</span>
             Continuar con Google
-          </Link>
+          </button>
           <div className="login-foot">Uso exclusivo para personal autorizado por la institución</div>
         </div>
       </section>

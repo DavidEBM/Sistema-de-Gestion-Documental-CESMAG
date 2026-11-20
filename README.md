@@ -19,6 +19,9 @@ npm run dev
 - `INSTITUTION_DOMAIN`: dominio institucional autorizado; también se valida con la propiedad `hd` verificada por Google.
 - `NEXT_PUBLIC_APP_NAME`: nombre visible de la aplicación.
 - Variables de Google Drive y SNIES: conservar secretos en servidor y definirlos por entorno.
+- `NEXT_PUBLIC_FIREBASE_*`: configuración pública del proyecto Firebase (API key, auth domain, project ID y app ID).
+- `GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON`: JSON completo de la cuenta de servicio de Google Drive, definido como secreto en Vercel.
+- `GOOGLE_DRIVE_PARENT_FOLDER_ID`: carpeta raíz opcional donde se crearán las subcarpetas `Informes` y `SNIES`.
 
 ## Base de datos
 
@@ -29,6 +32,10 @@ npx prisma generate
 ```
 
 El esquema incluye usuarios, perfiles, dependencias, roles, permisos, actividades, informes, plantillas, versiones SNIES, documentos, aprobaciones, auditoría y trabajos de sincronización.
+
+## Arquitectura de almacenamiento
+
+Firebase se utiliza para autenticación Google y datos administrativos, sin almacenar archivos. Firestore conserva usuarios, perfiles, vínculos de acceso y referencias de documentos. Google Drive recibe informes, imágenes y evidencias dentro de subcarpetas trazables. Los borradores de Informe y SNIES permanecen primero en `localStorage` del navegador; solo se suben a Drive al elegir explícitamente envío a revisión. Prisma permanece como capa de procesos y datos relacionales desplegada en Vercel con PostgreSQL/Neon.
 
 ## Google Workspace
 

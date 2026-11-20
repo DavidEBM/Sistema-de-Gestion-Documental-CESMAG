@@ -1,9 +1,8 @@
-import { AppShell } from "@/components/layout/AppShell";
 import { Save } from "lucide-react";
 
 export default function ProfilePage() {
   return (
-    <AppShell>
+
       <div className="content">
         <div className="page-header"><div><div className="eyebrow">Información institucional</div><h1>Mi perfil</h1></div><button className="primary"><Save size={16}/> Guardar cambios</button></div>
         <div className="grid-2">
@@ -28,6 +27,6 @@ export default function ProfilePage() {
           </section>
         </div>
       </div>
-    </AppShell>
+
   );
 }

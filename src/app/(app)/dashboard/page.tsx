@@ -1,9 +1,8 @@
-import { AppShell } from "@/components/layout/AppShell";
 import { Activity, CheckCircle2, Clock3, FileText, Plus } from "lucide-react";
 
 export default function DashboardPage() {
   return (
-    <AppShell>
+
       <div className="content">
         <div className="page-header">
           <div><div className="eyebrow">Miércoles, 19 de noviembre de 2026</div><h1>Buenos días, Ana</h1></div>
@@ -49,6 +48,6 @@ export default function DashboardPage() {
           </section>
         </div>
       </div>
-    </AppShell>
+
   );
 }

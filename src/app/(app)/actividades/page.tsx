@@ -1,9 +1,8 @@
-import { AppShell } from "@/components/layout/AppShell";
 import { Plus, Search } from "lucide-react";
 
 export default function ActivitiesPage() {
   return (
-    <AppShell>
+
       <div className="content">
         <div className="page-header">
           <div><div className="eyebrow">Gestión institucional</div><h1>Actividades</h1></div>
@@ -26,6 +25,6 @@ export default function ActivitiesPage() {
           </table>
         </section>
       </div>
-    </AppShell>
+
   );
 }

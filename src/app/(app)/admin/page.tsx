@@ -1,9 +1,8 @@
-import { AppShell } from "@/components/layout/AppShell";
 import { Plus } from "lucide-react";
 
 export default function AdminPage() {
   return (
-    <AppShell>
+
       <div className="content">
         <div className="page-header"><div><div className="eyebrow">Configuración institucional</div><h1>Administración</h1></div><button className="primary"><Plus size={16}/> Registrar usuario</button></div>
         <section className="cards">
@@ -18,6 +17,6 @@ export default function AdminPage() {
           </tbody></table>
         </section>
       </div>
-    </AppShell>
+
   );
 }

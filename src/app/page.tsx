@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-
 export default function Home() {
-  redirect("/login");
+  // `/` is redirected before rendering by next.config.ts.
+  return null;
 }
